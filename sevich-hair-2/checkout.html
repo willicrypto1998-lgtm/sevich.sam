@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إتمام الطلب | Sevich Hair</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="checkout">
+
+<div id="site-header-slot"></div>
+
+<main>
+<section class="checkout-page">
+    <div class="container">
+        <div class="checkout-layout">
+            <div class="checkout-form-section">
+                <h2>معلومات التوصيل</h2>
+                
+                <form id="checkoutForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">الاسم الكامل <span class="required">*</span></label>
+                            <input type="text" class="form-input" name="full_name" id="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">رقم الهاتف <span class="required">*</span></label>
+                            <input type="tel" class="form-input" name="phone" id="phone" required pattern="[0-9+\s]{8,15}" placeholder="05XXXXXXXX">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">البريد الإلكتروني (اختياري)</label>
+                        <input type="email" class="form-input" name="email" id="email">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">الولاية <span class="required">*</span></label>
+                            <select class="form-select" name="wilaya" id="wilaya" required>
+                                <option value="">-- اختر الولاية --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">البلدية <span class="required">*</span></label>
+                            <input type="text" class="form-input" name="commune" id="commune" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">العنوان الكامل <span class="required">*</span></label>
+                        <textarea class="form-textarea" name="address" id="address" required placeholder="الحي، الشارع، رقم المنزل..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">طريقة التوصيل <span class="required">*</span></label>
+                        <div class="form-radio-group">
+                            <label class="form-radio selected">
+                                <input type="radio" name="shipping" value="home" checked>
+                                <div class="form-radio-info">
+                                    <strong>توصيل للمنزل</strong>
+                                    <small id="shippingHomeLabel">DA 600</small>
+                                </div>
+                            </label>
+                            <label class="form-radio">
+                                <input type="radio" name="shipping" value="office">
+                                <div class="form-radio-info">
+                                    <strong>توصيل للمكتب</strong>
+                                    <small id="shippingOfficeLabel">DA 400</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">ملاحظات إضافية (اختياري)</label>
+                        <textarea class="form-textarea" name="notes" id="notes" placeholder="أي ملاحظات للتوصيل..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark btn-block btn-lg" id="submitOrderBtn">
+                        تأكيد الطلب — الدفع عند الاستلام
+                    </button>
+                    
+                    <p style="text-align:center; margin-top:16px; font-size:13px; color:var(--color-text-light);">
+                        🔒 معلوماتك آمنة ولن نشاركها مع أي طرف ثالث
+                    </p>
+                </form>
+            </div>
+            
+            <aside class="checkout-summary">
+                <h3 style="margin-bottom:20px;">ملخص الطلب</h3>
+                <div class="summary-items" id="summaryItems"></div>
+                <div class="summary-totals">
+                    <div class="totals-row">
+                        <span>المجموع الفرعي</span>
+                        <strong id="summarySubtotal">DA 0.00</strong>
+                    </div>
+                    <div class="totals-row">
+                        <span>التوصيل</span>
+                        <strong id="summaryShipping">DA 0.00</strong>
+                    </div>
+                    <div class="totals-row grand">
+                        <span>الإجمالي</span>
+                        <strong id="summaryGrand">DA 0.00</strong>
+                    </div>
+                </div>
+                <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--color-border);">
+                    <p style="font-size:12px; color:var(--color-text-light); display:flex; align-items:center; gap:8px;">
+                        💵 <span>الدفع عند الاستلام — لا حاجة للدفع المسبق</span>
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+</main>
+
+<div id="site-footer-slot"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/reviews.js"></script>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/layout.js"></script>
+<script>
+document.addEventListener('layout:ready', function() {
+    if (Cart.getAll().length === 0) {
+        window.location.href = 'catalog.html';
+        return;
+    }
+    
+    const config = SEVICH.getConfig();
+    const SHIPPING_HOME = config.shipping_home;
+    const SHIPPING_OFFICE = config.shipping_office;
+    
+    document.getElementById('shippingHomeLabel').textContent = SEVICH.formatPrice(SHIPPING_HOME);
+    document.getElementById('shippingOfficeLabel').textContent = SEVICH.formatPrice(SHIPPING_OFFICE);
+    
+    // Wilayas
+    const wilayaSelect = document.getElementById('wilaya');
+    Object.entries(SEVICH.wilayas).forEach(([code, name]) => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = `${code} - ${name}`;
+        wilayaSelect.appendChild(opt);
+    });
+    
+    function renderSummary() {
+        const cart = Cart.getAll();
+        const itemsEl = document.getElementById('summaryItems');
+        itemsEl.innerHTML = cart.map(item => `
+            <div class="summary-item">
+                <img src="${SEVICH.escapeAttr(item.image)}" alt="">
+                <div class="summary-item-info">
+                    <h5>${SEVICH.escapeHtml(item.title)}</h5>
+                    <small>${item.variantName ? SEVICH.escapeHtml(item.variantName) + ' · ' : ''}الكمية: ${item.quantity}</small>
+                </div>
+                <div class="summary-item-price">${SEVICH.formatPrice(item.price * item.quantity)}</div>
+            </div>
+        `).join('');
+        
+        const subtotal = Cart.getSubtotal();
+        const shipping = document.querySelector('input[name="shipping"]:checked').value === 'home' ? SHIPPING_HOME : SHIPPING_OFFICE;
+        document.getElementById('summarySubtotal').textContent = SEVICH.formatPrice(subtotal);
+        document.getElementById('summaryShipping').textContent = SEVICH.formatPrice(shipping);
+        document.getElementById('summaryGrand').textContent = SEVICH.formatPrice(subtotal + shipping);
+    }
+    renderSummary();
+    
+    document.querySelectorAll('input[name="shipping"]').forEach(input => {
+        input.addEventListener('change', () => {
+            document.querySelectorAll('.form-radio').forEach(r => r.classList.remove('selected'));
+            input.closest('.form-radio').classList.add('selected');
+            renderSummary();
+        });
+    });
+    
+    // ============ ABANDONED CART CAPTURE ============
+    let captureTimer = null;
+    function captureCustomer() {
+        clearTimeout(captureTimer);
+        captureTimer = setTimeout(() => {
+            const info = {
+                name: document.getElementById('fullName').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                wilaya: document.getElementById('wilaya').value,
+                commune: document.getElementById('commune').value.trim(),
+                address: document.getElementById('address').value.trim(),
+            };
+            if (info.phone && info.phone.replace(/\D/g, '').length >= 8) {
+                Cart.saveCustomerInfo(info);
+            }
+        }, 1500);
+    }
+    
+    ['fullName', 'phone', 'email', 'wilaya', 'commune', 'address'].forEach(id => {
+        const el = document.getElementById(id);
+        el?.addEventListener('input', captureCustomer);
+        el?.addEventListener('change', captureCustomer);
+    });
+    
+    // ============ SUBMIT ORDER ============
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitOrderBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'جاري المعالجة...';
+        
+        const cart = Cart.getAll();
+        const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+        const MAX = SEVICH.getConfig().max_cart_items;
+        
+        if (totalQty > MAX) {
+            SEVICH.toast(`الحد الأقصى للطلب هو ${MAX} قطع`, 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'تأكيد الطلب — الدفع عند الاستلام';
+            return;
+        }
+        
+        const customer = {
+            full_name: document.getElementById('fullName').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            wilaya: document.getElementById('wilaya').value,
+            commune: document.getElementById('commune').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            notes: document.getElementById('notes').value.trim(),
+        };
+        
+        // Validation
+        if (!customer.full_name || !customer.phone || !customer.wilaya || !customer.commune || !customer.address) {
+            SEVICH.toast('يرجى ملء جميع الحقول المطلوبة', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'تأكيد الطلب — الدفع عند الاستلام';
+            return;
+        }
+        
+        if (customer.phone.replace(/\D/g, '').length < 8) {
+            SEVICH.toast('رقم الهاتف غير صالح', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'تأكيد الطلب — الدفع عند الاستلام';
+            return;
+        }
+        
+        const shipping = document.querySelector('input[name="shipping"]:checked').value;
+        const shippingCost = shipping === 'office' ? SHIPPING_OFFICE : SHIPPING_HOME;
+        const subtotal = Cart.getSubtotal();
+        const total = subtotal + shippingCost;
+        
+        // Generate order ID
+        const today = new Date();
+        const dateStr = today.getFullYear().toString() + 
+                        String(today.getMonth() + 1).padStart(2, '0') + 
+                        String(today.getDate()).padStart(2, '0');
+        const orderId = 'SH-' + dateStr + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+        
+        const order = {
+            id: orderId,
+            customer: customer,
+            shipping: shipping,
+            cart: cart,
+            subtotal: subtotal,
+            shipping_cost: shippingCost,
+            total: total,
+            status: 'pending',
+            created_at: new Date().toISOString(),
+        };
+        
+        // Save locally
+        const orders = SEVICH.storage.get(SEVICH.KEYS.ORDERS, []);
+        orders.push(order);
+        SEVICH.storage.set(SEVICH.KEYS.ORDERS, orders);
+        
+        // Mark abandoned as recovered
+        const abandoned = SEVICH.storage.get(SEVICH.KEYS.ABANDONED, []);
+        const phoneClean = customer.phone.replace(/\D/g, '');
+        for (let i = 0; i < abandoned.length; i++) {
+            const abPhone = (abandoned[i].customer.phone || '').replace(/\D/g, '');
+            if (abPhone === phoneClean) {
+                abandoned[i].recovered = true;
+                abandoned[i].recovered_at = new Date().toISOString();
+                abandoned[i].order_id = orderId;
+            }
+        }
+        SEVICH.storage.set(SEVICH.KEYS.ABANDONED, abandoned);
+        
+        // Send to Google Sheets
+        if (config.google_sheets_webhook) {
+            const wilayaName = SEVICH.wilayas[customer.wilaya] || customer.wilaya;
+            const cartSummary = cart.map(item => 
+                `${item.title}${item.variantName ? ' (' + item.variantName + ')' : ''} x${item.quantity}`
+            ).join('\n');
+            
+            try {
+                await fetch(config.google_sheets_webhook, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'order',
+                        data: {
+                            order_id: orderId,
+                            name: customer.full_name,
+                            phone: customer.phone,
+                            email: customer.email,
+                            wilaya: customer.wilaya + ' - ' + wilayaName,
+                            commune: customer.commune,
+                            address: customer.address,
+                            shipping_type: shipping === 'office' ? 'مكتب' : 'منزل',
+                            shipping_cost: shippingCost,
+                            cart_items: cartSummary,
+                            total_qty: totalQty,
+                            subtotal: subtotal,
+                            total: total,
+                            notes: customer.notes,
+                            created_at: new Date().toISOString(),
+                            status: 'En attente',
+                        },
+                    }),
+                });
+            } catch (err) {
+                // Continue même si Google Sheets fail
+            }
+        }
+        
+        // Facebook Pixel : Purchase
+        if (typeof fbq !== 'undefined') {
+            fbq('track', 'Purchase', {
+                content_ids: cart.map(i => i.id),
+                num_items: totalQty,
+                value: total,
+                currency: 'DZD',
+            });
+        }
+        
+        Cart.clear();
+        Cart.clearAbandoned();
+        window.location.href = 'order-success.html?order=' + encodeURIComponent(orderId);
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اتصل بنا | Sevich Hair</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="contact">
+
+<div id="site-header-slot"></div>
+
+<main>
+<section class="section">
+    <div class="container">
+        <div class="section-header" style="text-align:right; margin-bottom:32px;">
+            <h1 class="section-title">اتصل بنا</h1>
+            <p class="section-subtitle">نحن هنا لخدمتكم. لا تترددوا في التواصل معنا</p>
+        </div>
+        
+        <div class="contact-layout">
+            <div class="contact-info-card">
+                <h3 style="margin-bottom:20px;">معلومات التواصل</h3>
+                
+                <div class="contact-item">
+                    <span class="icon">📞</span>
+                    <div>
+                        <h4>الهاتف / واتساب</h4>
+                        <p id="contactPhone">—</p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="icon">✉️</span>
+                    <div>
+                        <h4>البريد الإلكتروني</h4>
+                        <p id="contactEmail">—</p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="icon">🕐</span>
+                    <div>
+                        <h4>ساعات العمل</h4>
+                        <p>السبت - الخميس: 9:00 - 18:00</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top:24px;">
+                    <a id="whatsappBtn" href="#" class="btn btn-dark btn-block" target="_blank">
+                        💬 راسلنا على واتساب
+                    </a>
+                </div>
+            </div>
+            
+            <div>
+                <form id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">الاسم <span class="required">*</span></label>
+                            <input type="text" class="form-input" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">رقم الهاتف <span class="required">*</span></label>
+                            <input type="tel" class="form-input" name="phone" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" class="form-input" name="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الموضوع <span class="required">*</span></label>
+                        <input type="text" class="form-input" name="subject" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الرسالة <span class="required">*</span></label>
+                        <textarea class="form-textarea" name="message" rows="6" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark btn-lg" id="contactSubmit">إرسال الرسالة</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+
+<div id="site-footer-slot"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/layout.js"></script>
+<script>
+document.addEventListener('layout:ready', function() {
+    const config = SEVICH.getConfig();
+    document.getElementById('contactPhone').textContent = config.whatsapp_number;
+    document.getElementById('contactEmail').textContent = config.email;
+    const phoneClean = config.whatsapp_number.replace(/\D/g, '');
+    document.getElementById('whatsappBtn').href = 'https://wa.me/' + phoneClean;
+    
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('contactSubmit');
+        btn.disabled = true;
+        btn.textContent = 'جاري الإرسال...';
+        
+        const data = Object.fromEntries(new FormData(e.target));
+        
+        if (config.google_sheets_webhook) {
+            try {
+                await fetch(config.google_sheets_webhook, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'contact',
+                        data: { ...data, created_at: new Date().toISOString() },
+                    }),
+                });
+            } catch (err) {}
+        }
+        
+        SEVICH.toast('تم إرسال رسالتك بنجاح', 'success');
+        e.target.reset();
+        btn.disabled = false;
+        btn.textContent = 'إرسال الرسالة';
+    });
+});
+</script>
+
+</body>
+</html>
