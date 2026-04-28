@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>السلال المتروكة - Sevich Hair</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+    <div id="sidebarSlot"></div>
+    <main class="admin-main" id="mainContent"></main>
+</div>
+
+<script src="../assets/js/data.js"></script>
+<script src="admin.js"></script>
+<script>
+Admin.init('abandoned');
+
+let filter = SEVICH.getQueryParam('filter') || 'pending';
+
+function render() {
+    const abandoned = Admin.getAbandoned();
+    let filtered = [...abandoned].reverse();
+    if (filter === 'pending') filtered = filtered.filter(a => !a.recovered);
+    else if (filter === 'recovered') filtered = filtered.filter(a => a.recovered);
+    
+    document.getElementById('mainContent').innerHTML = `
+    <div class="admin-header">
+        <h1>⚠️ السلال المتروكة</h1>
+        <div class="btn-group">
+            <a href="?filter=pending" class="btn-admin ${filter === 'pending' ? 'btn-primary' : 'btn-outline'} btn-sm">قيد المتابعة</a>
+            <a href="?filter=recovered" class="btn-admin ${filter === 'recovered' ? 'btn-primary' : 'btn-outline'} btn-sm">مسترجعة</a>
+            <a href="?filter=all" class="btn-admin ${filter === 'all' ? 'btn-primary' : 'btn-outline'} btn-sm">الكل</a>
+        </div>
+    </div>
+    
+    <div class="alert alert-info">
+        💡 <strong>كيف يعمل النظام:</strong> عندما يبدأ زبون في ملء معلومات الطلب (الاسم والهاتف) ولا يكمل الشراء، 
+        تظهر سلته هنا تلقائيا حتى تتمكن من التواصل معه عبر واتساب أو الهاتف لاسترجاع البيع.
+    </div>
+    
+    <div class="admin-card">
+        <div class="admin-card-body no-padding">
+            ${filtered.length === 0 ? `
+                <div class="empty-state">
+                    <div class="icon">✅</div>
+                    <p>لا توجد سلال متروكة</p>
+                </div>
+            ` : `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>الزبون</th>
+                            <th>الهاتف</th>
+                            <th>المنتجات</th>
+                            <th>المبلغ</th>
+                            <th>آخر تحديث</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.map(a => {
+                            const phone = a.customer.phone || '';
+                            const phoneClean = phone.replace(/\D/g, '');
+                            const cartItems = a.cart.map(item => 
+                                `${SEVICH.escapeHtml(item.title)} (×${item.quantity})`
+                            ).join('<br>');
+                            const waMessage = encodeURIComponent('السلام عليكم، رأيت أنكم اخترتم بعض المنتجات من موقعنا. هل تحتاجون مساعدة لإكمال الطلب؟');
+                            
+                            return `
+                            <tr>
+                                <td>
+                                    <strong>${SEVICH.escapeHtml(a.customer.name || '—')}</strong>
+                                    ${a.customer.wilaya ? `<div style="font-size:11px; color:#888;">ولاية ${SEVICH.escapeHtml(a.customer.wilaya)}</div>` : ''}
+                                </td>
+                                <td style="direction:ltr; text-align:right;">${SEVICH.escapeHtml(phone)}</td>
+                                <td style="font-size:12px; max-width:300px;">${cartItems}</td>
+                                <td style="font-weight:600;">${(a.subtotal || 0).toLocaleString()} DA</td>
+                                <td style="font-size:11px; color:#888;">${formatDate(a.updated_at || a.created_at)}</td>
+                                <td>
+                                    ${a.recovered ? `
+                                        <span class="status-badge recovered">✓ مسترجعة</span>
+                                        ${a.order_id ? `<div style="font-size:10px; color:#888; margin-top:4px;">طلب: ${SEVICH.escapeHtml(a.order_id)}</div>` : ''}
+                                    ` : `<span class="status-badge pending">قيد المتابعة</span>`}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        ${phoneClean ? `
+                                            <a href="https://wa.me/${phoneClean}?text=${waMessage}" target="_blank" class="btn-admin btn-sm btn-success" title="WhatsApp">💬</a>
+                                            <a href="tel:${SEVICH.escapeAttr(phone)}" class="btn-admin btn-sm btn-primary" title="اتصال">📞</a>
+                                        ` : ''}
+                                        ${!a.recovered ? `
+                                            <button class="btn-admin btn-sm btn-outline" data-action="recover" data-id="${SEVICH.escapeAttr(a.id)}" title="تعليم كمسترجع">✓</button>
+                                        ` : ''}
+                                        <button class="btn-admin btn-sm btn-danger" data-action="delete" data-id="${SEVICH.escapeAttr(a.id)}" title="حذف">🗑</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `}
+        </div>
+    </div>
+    `;
+    
+    document.querySelectorAll('[data-action="recover"]').forEach(btn => {
+        btn.addEventListener('click', () => markRecovered(btn.dataset.id));
+    });
+    document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (confirm('هل أنت متأكد؟')) deleteAbandoned(btn.dataset.id);
+        });
+    });
+}
+
+function markRecovered(id) {
+    const list = Admin.getAbandoned();
+    const idx = list.findIndex(a => a.id === id);
+    if (idx === -1) return;
+    list[idx].recovered = true;
+    list[idx].recovered_at = new Date().toISOString();
+    Admin.saveAbandoned(list);
+    SEVICH.toast('✓ تم تعليم السلة كمسترجعة', 'success');
+    setTimeout(() => render(), 500);
+}
+
+function deleteAbandoned(id) {
+    let list = Admin.getAbandoned();
+    list = list.filter(a => a.id !== id);
+    Admin.saveAbandoned(list);
+    SEVICH.toast('✓ تم الحذف', 'success');
+    setTimeout(() => render(), 500);
+}
+
+function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+render();
+</script>
+
+</body>
+</html>
