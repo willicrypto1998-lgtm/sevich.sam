@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>دليل ربط Google Sheets - Sevich Hair</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Cairo', sans-serif; background: #f5f5f7; color: #1d1d1f; line-height: 1.7; padding: 40px 20px; }
+.container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+h1 { font-size: 28px; margin-bottom: 16px; }
+h2 { font-size: 20px; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #1d1d1f; }
+ol { padding-right: 24px; margin: 16px 0; }
+li { margin-bottom: 12px; }
+code { background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+pre { background: #1d1d1f; color: #fff; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; font-size: 12px; line-height: 1.5; }
+.alert { background: #fff3cd; border: 1px solid #ffe69c; padding: 12px 16px; border-radius: 6px; margin: 16px 0; font-size: 14px; }
+.alert-success { background: #d1e7dd; border-color: #badbcc; }
+.alert-info { background: #cff4fc; border-color: #b6effb; }
+a { color: #0066cc; }
+.back { display: inline-block; margin-bottom: 24px; padding: 8px 16px; background: #1d1d1f; color: white; border-radius: 6px; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <a href="../admin/settings.html" class="back">← العودة للإعدادات</a>
+    
+    <h1>📊 دليل ربط Google Sheets</h1>
+    <p>اتبع هذه الخطوات لربط موقعك بـ Google Sheets كقاعدة بيانات احتياطية. بمجرد الإعداد، كل طلب جديد، سلة متروكة، اشتراك بريدي، أو رسالة اتصال ستحفظ تلقائيا في ورقة Google.</p>
+    
+    <div class="alert alert-info">
+        💡 <strong>لماذا Google Sheets؟</strong> الموقع يعمل بدون سيرفر (HTML/JS فقط). البيانات محفوظة في متصفح المستخدم. ربط Google Sheets يعطيك نسخة احتياطية في السحابة + إمكانية الوصول من أي جهاز.
+    </div>
+    
+    <h2>الخطوة 1: إنشاء Google Sheet</h2>
+    <ol>
+        <li>اذهب إلى <a href="https://sheets.google.com" target="_blank">Google Sheets</a></li>
+        <li>أنشئ ورقة جديدة (Blank spreadsheet)</li>
+        <li>سمّها مثلا: <code>Sevich Hair - Database</code></li>
+    </ol>
+    
+    <h2>الخطوة 2: فتح Apps Script</h2>
+    <ol>
+        <li>في Google Sheet، اذهب إلى القائمة <strong>Extensions</strong> → <strong>Apps Script</strong></li>
+        <li>سيفتح محرر سكريبت في تبويب جديد</li>
+        <li>احذف كل الكود الموجود في <code>Code.gs</code></li>
+    </ol>
+    
+    <h2>الخطوة 3: لصق الكود</h2>
+    <ol>
+        <li>افتح ملف <code>docs/google-apps-script.gs</code> الموجود في المجلد</li>
+        <li>انسخ كل محتواه</li>
+        <li>الصقه في محرر Apps Script</li>
+        <li>احفظ المشروع: اضغط <code>Ctrl+S</code> أو أيقونة الحفظ</li>
+        <li>سمّ المشروع: <code>Sevich Hair Webhook</code></li>
+    </ol>
+    
+    <h2>الخطوة 4: نشر كتطبيق ويب</h2>
+    <ol>
+        <li>اضغط زر <strong>Deploy</strong> (أعلى يسار) ← <strong>New deployment</strong></li>
+        <li>اضغط رمز الترس (⚙) ← اختر <strong>Web app</strong></li>
+        <li>املأ الحقول:
+            <ul style="margin-top:8px;">
+                <li><strong>Description:</strong> Sevich Webhook v1</li>
+                <li><strong>Execute as:</strong> Me (your email)</li>
+                <li><strong>Who has access:</strong> <span style="color:#c41e3a; font-weight:600;">Anyone</span> ← مهم جدا!</li>
+            </ul>
+        </li>
+        <li>اضغط <strong>Deploy</strong></li>
+        <li>وافق على الأذونات (Authorization required) - استعمل حساب Google نفسه</li>
+        <li>انسخ <strong>Web app URL</strong> الذي يظهر</li>
+    </ol>
+    
+    <div class="alert">
+        ⚠️ الرابط يجب أن ينتهي بـ <code>/exec</code> وليس <code>/dev</code>
+    </div>
+    
+    <h2>الخطوة 5: لصق الرابط في الموقع</h2>
+    <ol>
+        <li>اذهب إلى <a href="../admin/settings.html">Admin Settings</a></li>
+        <li>الصق الرابط في حقل <strong>Google Sheets Webhook URL</strong></li>
+        <li>احفظ</li>
+        <li>اضغط <strong>اختبار الاتصال</strong></li>
+        <li>عُد إلى Google Sheet وتأكد من ظهور ورقة "Test Log" مع رسالة الاختبار</li>
+    </ol>
+    
+    <div class="alert alert-success">
+        ✅ تهانينا! النظام مرتبط الآن. كل طلب جديد سيظهر تلقائيا في Google Sheet ضمن ورقة "Orders".
+    </div>
+    
+    <h2>الأوراق التي ستظهر تلقائيا</h2>
+    <ul style="padding-right:24px;">
+        <li><strong>Orders</strong> - كل الطلبات المؤكدة</li>
+        <li><strong>Abandoned Carts</strong> - السلال المتروكة (للمتابعة)</li>
+        <li><strong>Newsletter</strong> - اشتراكات النشرة البريدية</li>
+        <li><strong>Contact</strong> - رسائل صفحة "اتصل بنا"</li>
+        <li><strong>Test Log</strong> - سجل اختبارات الاتصال</li>
+    </ul>
+    
+    <h2>تحديثات لاحقة</h2>
+    <p>إذا قمت بتعديل الكود في Apps Script لاحقا:</p>
+    <ol>
+        <li><strong>Deploy</strong> → <strong>Manage deployments</strong></li>
+        <li>اضغط رمز التعديل (✏️) بجانب الإصدار الحالي</li>
+        <li><strong>Version</strong> ← <strong>New version</strong></li>
+        <li><strong>Deploy</strong></li>
+    </ol>
+    
+    <div class="alert">
+        🔍 ملاحظة: الموقع يستخدم <code>mode: 'no-cors'</code> عند الإرسال لـ Apps Script. هذا يعني أن المتصفح لا يستطيع قراءة الرد، لكن البيانات ترسل بنجاح. هذا التصميم متعمد لأن المتصفحات لا تسمح بـ CORS من ملف HTML محلي إلى Google.
+    </div>
+</div>
+
+</body>
+</html>
